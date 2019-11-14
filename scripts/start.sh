@@ -1,5 +1,23 @@
 #!/bin/sh
 
+#! /bin/sh
+chown -R $PUID:$PGID /config
+
+GROUPNAME=$(getent group $PGID | cut -d: -f1)
+USERNAME=$(getent passwd $PUID | cut -d: -f1)
+
+if [ ! $GROUPNAME ]
+then
+        addgroup -g $PGID mariadb
+        GROUPNAME=mariadb
+fi
+
+if [ ! $USERNAME ]
+then
+        adduser -G $GROUPNAME -u $PUID -D mariadb
+        USERNAME=mariadb
+fi
+
 # execute any pre-init scripts, useful for images
 # based on this image
 for i in /scripts/pre-init.d/*sh
@@ -15,14 +33,14 @@ if [ ! -d "/run/mysqld" ]; then
         chown -R mysql:mysql /run/mysqld
 fi
 
+chown -R ${USERNAME}:${GROUPNAME} /var/lib/mysql
+
 if [ -d /var/lib/mysql/mysql ]; then
         echo "[i] MySQL directory already present, skipping creation"
 else
         echo "[i] MySQL data directory not found, creating initial DBs"
 
-        chown -R mysql:mysql /var/lib/mysql
-
-        mysql_install_db --user=mysql > /dev/null
+        mysql_install_db --user=${USERNAME} > /dev/null
 
         if [ "$MYSQL_ROOT_PASSWORD" = "" ]; then
                 MYSQL_ROOT_PASSWORD=`pwgen 16 1`
@@ -57,18 +75,8 @@ EOF
             fi
         fi
 
-        /usr/bin/mysqld --user=mysql --bootstrap --verbose=0 < $tfile
+        /usr/bin/mysqld --user=${USERNAME} --bootstrap --verbose=0 < $tfile
         rm -f $tfile
 fi
 
-# execute any pre-exec scripts, useful for images
-# based on this image
-for i in /scripts/pre-exec.d/*sh
-do
-        if [ -e "${i}" ]; then
-                echo "[i] pre-exec.d - processing $i"
-                . ${i}
-        fi
-done
-
-exec /usr/bin/mysqld --user=mysql --console
+exec /usr/bin/mysqld --user=${USERNAME} --console
