@@ -14,7 +14,7 @@ COPY scripts/start.sh /
 RUN apk -U --no-cache upgrade
 RUN apk add --no-cache mariadb mariadb-server-utils mariadb-client pwgen
 RUN sed -i '/skip-networking/d' /etc/my.cnf.d/mariadb-server.cnf
-RUN mkdir /scripts/pre-exec.d /scripts/pre-init.d
+RUN mkdir -p /scripts/pre-exec.d /scripts/pre-init.d
 RUN chmod -R 777 /scripts /start.sh
 
 RUN rm -rf /tmp/* /var/cache/apk/* /usr/bin/qemu-*-static
