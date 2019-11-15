@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #! /bin/sh
-chown -R $PUID:$PGID /config
+chown -R $PUID:$PGID /config /run/mysqld
 
 GROUPNAME=$(getent group $PGID | cut -d: -f1)
 USERNAME=$(getent passwd $PUID | cut -d: -f1)
@@ -30,10 +30,9 @@ done
 
 if [ ! -d "/run/mysqld" ]; then
         mkdir -p /run/mysqld
-        chown -R mysql:mysql /run/mysqld
 fi
 
-chown -R ${USERNAME}:${GROUPNAME} /var/lib/mysql
+chown -R ${USERNAME}:${GROUPNAME} /var/lib/mysql /run/mysqld
 
 if [ -d /var/lib/mysql/mysql ]; then
         echo "[i] MySQL directory already present, skipping creation"
