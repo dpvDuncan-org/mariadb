@@ -1,28 +1,21 @@
-# see hooks/build and hooks/.config
 ARG BASE_IMAGE_PREFIX
+
+FROM multiarch/qemu-user-static as qemu
+
 FROM ${BASE_IMAGE_PREFIX}alpine
 
-# see hooks/post_checkout
-ARG ARCH
-COPY .gitignore qemu-${ARCH}-static* /usr/bin/
+COPY --from=qemu /usr/bin/qemu-*-static /usr/bin/
 
-# see hooks/build and hooks/.config
-ARG BASE_IMAGE_PREFIX
-FROM ${BASE_IMAGE_PREFIX}alpine
+ENV PUID=0
+ENV PGID=0
 
-# see hooks/post_checkout
-ARG ARCH
-COPY qemu-${ARCH}-static /usr/bin
-
-RUN apk update && apk upgrade
-
-ADD scripts/start.sh /start.sh
+COPY scripts/start.sh /
 
 RUN apk -U --no-cache upgrade
 RUN apk add --no-cache mariadb mariadb-server-utils mariadb-client pwgen
 RUN sed -i '/skip-networking/d' /etc/my.cnf.d/mariadb-server.cnf
 RUN mkdir /scripts/pre-exec.d /scripts/pre-init.d
-RUN chmod -R 755 /scripts /start.sh
+RUN chmod -R 777 /scripts /start.sh
 
 RUN rm -rf /tmp/* /var/cache/apk/* /usr/bin/qemu-*-static
 
