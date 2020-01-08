@@ -1,8 +1,5 @@
 #!/bin/sh
 
-#! /bin/sh
-chown -R $PUID:$PGID /config /run/mysqld
-
 GROUPNAME=$(getent group $PGID | cut -d: -f1)
 USERNAME=$(getent passwd $PUID | cut -d: -f1)
 
