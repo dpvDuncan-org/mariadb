@@ -36,7 +36,7 @@ if [ -d /var/lib/mysql/mysql ]; then
 else
         echo "[i] MySQL data directory not found, creating initial DBs"
 
-        mysql_install_db --user=${USERNAME} > /dev/null
+        mysql_install_db --user=${USERNAME} --datadir='/var/lib/mysql' > /dev/null
 
         if [ "$MYSQL_ROOT_PASSWORD" = "" ]; then
                 MYSQL_ROOT_PASSWORD=`pwgen 16 1`
@@ -71,8 +71,8 @@ EOF
             fi
         fi
 
-        /usr/bin/mysqld --user=${USERNAME} --bootstrap --verbose=0 < $tfile
+        /usr/bin/mysqld --user=${USERNAME} --bootstrap --verbose=0  --datadir='/var/lib/mysql' < $tfile
         rm -f $tfile
 fi
 
-exec /usr/bin/mysqld --user=${USERNAME} --console
+/usr/bin/mysqld --user=${USERNAME}  --datadir='/var/lib/mysql' --console
