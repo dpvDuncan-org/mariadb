@@ -71,4 +71,4 @@ EOF
         rm -f $tfile
 fi
 
-/usr/bin/mysqld --user=${USERNAME}  --datadir='/var/lib/mysql' --console
+/usr/bin/mysqld --user=${USERNAME} --datadir='/var/lib/mysql' --console
